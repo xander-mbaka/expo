@@ -34,36 +34,42 @@ class ApplicationController extends Controller
         $this->reservations = $reservations;
     }
 
-    /**
-     * Display a list of all of the user's task.
-     *
-     * @param  Request  $request
-     * @return Response
-     */
-
-    /*public function index(Request $request)
-    {
-        $locations = location::orderBy('created_at', 'asc')->get();
-
-        return view('locations', [
-            'locations' => $locations,
-        ]);
-    }*/
-
     public function index(Request $request)
     {
         return view('layouts.index');
     }
 
 
-    public function reservations(Request $request, Event $event)
+    public function reservations(Request $request, $eid)
     {
-        return view('reservations.index', [
-            'reservations' => $this->reservations->forEvent($event),
-        ]);
+        $event = Event::find($eid);
+        $reservations = $event->reservations;
+
+        foreach ($reservations as &$reservation) {
+            $reservation->stall;
+        }
+
+        return response()->json($reservations);
     }
 
-    public function events(Request $request)
+    public function event(Request $request, $id)
+    {
+        $event = Event::where('id', $id)->first();
+
+        $event->location;
+
+        return response()->json($event);
+    }
+
+    public function events(Request $request, $loc)
+    {
+        $events = Location::find($loc)->events()->whereDate('end_at', '>', date('Y-m-d'))->get();
+        //$events = DB::table('events')->whereDate('end_at', '>', date('Y-m-d'))->andWhere('end_at', '=', date('Y-m-d'))->get();
+
+        return response()->json($events);
+    }
+
+    /*public function events(Request $request, Location $loc)
     {
         //$events = Event::orderBy('created_at', 'asc')->get();
         $events = DB::table('events')
@@ -73,12 +79,23 @@ class ApplicationController extends Controller
         return view('events.index', [
             'events' => $events
         ]);
+    }*/
+
+    public function location(Request $request, $id)
+    {
+        $location = location::where('id', $id)->first();
+
+        return response()->json($location);
     }
 
     public function locations(Request $request)
     {
-        //$events = Event::orderBy('created_at', 'asc')->get();
         $locations = location::orderBy('created_at', 'asc')->get();
+
+
+        foreach ($locations as &$location) {
+            $c = count($location->events);
+        }
 
         return response()->json($locations);
     }

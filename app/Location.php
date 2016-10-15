@@ -3,7 +3,7 @@
 namespace App;
 
 use App\Event;
-use App\Hall;
+use App\Stall;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -11,7 +11,7 @@ class Location extends Model
 {
     //
     protected $fillable = [
-        'name', 'path', 'color'
+        'name', 'path', 'hall_path', 'color', 'img_url'
     ];
 
     public function events()
@@ -19,8 +19,8 @@ class Location extends Model
         return $this->hasMany(Event::class);
     }
 
-    public function hall()
+    public function stalls()
     {
-        return $this->hasMany(Hall::class);
+        return $this->hasMany(Stall::class);
     }
 }

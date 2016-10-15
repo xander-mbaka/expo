@@ -17,7 +17,9 @@ class CreateStallsTable extends Migration
             $table->string('name');
             $table->decimal('price', 11, 2);
             $table->string('image_url');
+            $table->integer('location_id');
             $table->longText('path');
+            $table->decimal('sq_feet', 11, 2);
             $table->timestamps();
         });
     }

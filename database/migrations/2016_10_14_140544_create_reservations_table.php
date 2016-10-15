@@ -14,8 +14,8 @@ class CreateReservationsTable extends Migration
     {
         Schema::create('reservations', function (Blueprint $table) {
             $table->increments('id');
-            //$table->integer('event_id');
-            //$table->integer('stall_id');
+            $table->integer('event_id');
+            $table->integer('stall_id');
             $table->string('company');
             $table->string('address');
             $table->string('contact_person');
@@ -23,7 +23,8 @@ class CreateReservationsTable extends Migration
             $table->string('website');
             $table->string('logo_url');
             $table->string('marketing_url');
-            $table->decimal('amount', 5, 2);
+            $table->decimal('amount', 11, 2);
+            $table->integer('status', 1);
             $table->timestamps();
             $table->softDeletes();
         });

@@ -12,67 +12,56 @@ define(["app"], function(System){
       model: Entities.Model
     });
 
-    //Entities.configureStorage(Entities.Model);
+    var fetchCollection = function(url){
+      var collection;
+      var defer = $.Deferred();
 
-    //Entities.configureStorage(Entities.Collection);
-
-    var initializeCollection = function(val){
-      var collection = new Entities.Collection(val);
-      return collection.models;
+      $.when(
+        $.get(url, function(val){
+          collection = new Entities.Collection(val);
+        })
+      ).done(function() {
+        defer.resolve(collection);
+      });
+      return defer.promise();
     };
 
-    var blogs, currentBlog;
+    var fetchModel = function(url){
+      var model;
+      var defer = $.Deferred();
+
+      $.when(
+        $.get(url, function(val){
+          model = new Entities.Model(val);
+        })
+      ).done(function() {
+        defer.resolve(model);
+      });
+      return defer.promise();
+    };
 
     var API = {
       getLocations: function(){
-        var model = new Entities.Model();
-        var collection;
-        var defer = $.Deferred();
-
-        $.when(
-          $.get("/locations", function(val){
-            collection = new Entities.Collection(val);
-          })
-        ).done(function() {
-          defer.resolve(collection);
-        });
-        return defer.promise();
+        return fetchCollection('/locations');
       },
 
-      createProduct: function(data){
-        var product = new Entities.Model();
-        var defer = $.Deferred();
-        
-        $.when(
-
-          $.post("/ecomadmin/service/inventory/index.php", data, function(val){
-            //var a = JSON.parse(val);
-            //alert(JSON.stringify(a['features']));
-            product.set(JSON.parse(val));
-                
-          })
-
-        ).done(function() {
-          defer.resolve(product);
-        });
-        return defer.promise();
-      }, 
-
-      getProduct: function(id){
-        var model;
-        var defer = $.Deferred();
-
-        $.when(
-
-          $.get("/ecomadmin/service/inventory/?prodid="+id, function(val){
-            var model = Entities.Model(JSON.parse(val));    
-          })
-
-        ).done(function() {
-          defer.resolve(model);
-        });
-        return defer.promise();
+      getLocationEvents: function(id){
+        return fetchCollection('/location/'+id+'/events');
       },
+
+      getLocation: function(id){
+        return fetchModel('/location/'+id);
+      },
+
+      getEvent: function(id){
+        return fetchModel('/event/'+id);
+      },
+
+      getEventReservations: function(id){
+        return fetchCollection('/event/'+id+'/reservations');
+      },
+
+     
 
       getProductsCatalog: function(page, maincat, qty){
         var model = new Entities.Model();
@@ -108,142 +97,26 @@ define(["app"], function(System){
         return defer.promise();
       },
 
-      getFilteredCatalog: function(params){
-        var model = new Entities.Model();
-        var collection;
-        var defer = $.Deferred();
-        var name = params['name'];
-        var page = params['page'];
-        var qty = params['qty'];
-        var sort = params['sort'];
-        var cats = params['cats'];
-        var maincat = params['maincat'];
-        var max = params['max'];
-        var min = params['min'];
-
-        $.when(
-
-          $.get("/ecomadmin/service/inventory/?filterCatalog&name="+name+"&page="+page+"&qty="+qty+"&sort="+sort+"&cats="+cats+"&collection="+maincat+"&max="+max+"&min="+min, function(val){
-            collection = new Entities.Collection(JSON.parse(val));  
-          }),
-
-          $.get("/ecomadmin/service/inventory/?categories", function(val){
-            model.set('categories', new Entities.Collection(JSON.parse(val)));
-          })
-
-        ).done(function() {
-          params['resultcount'] = collection.length;
-
-          model.set(params);
-          model.set('products', collection);
-          defer.resolve(model);
-        });
-        return defer.promise();
-      },
-
-      getFeaturedProducts: function(){
-        var collection;
-        var defer = $.Deferred();
-
-        $.when(
-
-          $.get("/ecomadmin/service/inventory/?products&featured", function(val){
-            collection = new Entities.Collection(JSON.parse(val))       
-          })
-
-        ).done(function() {
-          defer.resolve(collection);
-        });
-        return defer.promise();
-      },
-
-      getLatestProducts: function(){
-        var collection;
-        var defer = $.Deferred();
-
-        $.when(
-
-          $.get("/ecomadmin/service/inventory/?products&latest", function(val){
-            collection = new Entities.Collection(JSON.parse(val))       
-          })
-
-        ).done(function() {
-          defer.resolve(collection);
-        });
-        return defer.promise();
-      },
-
-      searchProducts: function(name){
-        var subscribers = new Entities.Collection();
-        var defer = $.Deferred();
-
-        $.when(
-
-          $.get("/ecomadmin/service/admin/?searchSubscriber&name="+name, function(val){
-            var models = initializeCollection(JSON.parse(val));
-            subscribers.reset(models);       
-          })
-
-        ).done(function() {
-          defer.resolve(subscribers);
-        });
-        return defer.promise();
-        
-      },
-
-      getAccountDetails: function(){
-        var account;
-        var defer = $.Deferred();
-
-        $.when(
-
-          $.get("/ecomadmin/service/admin/?adminDetails", function(val){
-            account = new Entities.Model(JSON.parse(val));      
-          })
-
-        ).done(function() {
-          defer.resolve(account);
-        });
-        return defer.promise();
-        
-      },
-
-      getDashboardEntities: function(){
-        var dash;
-        var defer = $.Deferred();
-
-        $.when(
-
-          $.get("/ecomadmin/service/admin/?dashDetails", function(val){
-            dash = new Entities.Model(JSON.parse(val));      
-          })
-
-        ).done(function() {
-          defer.resolve(dash);
-        });
-        return defer.promise();
-        
-      }
     };
-
-    System.reqres.setHandler("product:create", function(data){
-      return API.createProduct(data);
-    });
-
-    System.reqres.setHandler("product:catalog", function(page, maincat, qty){
-      return API.getProductsCatalog(page, maincat, qty);
-    });
 
     System.reqres.setHandler("locations", function(){
       return API.getLocations();
     });
 
-    System.reqres.setHandler("product:latest", function(){
-      return API.getLatestProducts();
+    System.reqres.setHandler("location:events", function(id){
+      return API.getLocationEvents(id);
     });
 
-    System.reqres.setHandler("product:filter", function(params){
-      return API.getFilteredCatalog(params);
+    System.reqres.setHandler("event:reservations", function(id){
+      return API.getEventReservations(id);
+    });
+
+    System.reqres.setHandler("location", function(id){
+      return API.getLocation(id);
+    });
+
+    System.reqres.setHandler("event", function(id){
+      return API.getEvent(id);
     });
   });
 

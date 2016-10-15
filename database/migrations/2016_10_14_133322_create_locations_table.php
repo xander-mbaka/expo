@@ -16,7 +16,9 @@ class CreateLocationsTable extends Migration
             $table->increments('id');
             $table->string('name');
             $table->longText('path');
+            $table->longText('hall_path');
             $table->string('color');
+            $table->string('img_url');
             $table->timestamps();
         });
     }

@@ -14,6 +14,11 @@ class Reservation extends Model
         'event_id', 'stall_id', 'company', 'address', 'contact_person', 'contact_email', 'website', 'logo_url', 'marketing_url', 'amount'
     ];
 
+    protected $casts = [
+        'event_id' => 'int', 'stall_id' => 'int',
+    ];
+
+
     public function event()
     {
         return $this->belongsTo(Event::class);

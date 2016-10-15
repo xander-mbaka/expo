@@ -16,10 +16,11 @@ class CreateEventsTable extends Migration
             $table->increments('id');
             $table->string('name');
             $table->longtext('description');
-            $table->dateTime('begin_at');
-            $table->dateTime('end_at');
+            $table->date('begin_at');
+            $table->date('end_at');
             $table->integer('status');
             $table->timestamps();
+            $table->integer('location_id');
         });
     }
 

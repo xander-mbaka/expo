@@ -20,8 +20,19 @@
 
     <body id="body">
         <div class="loading"><img src="{{ asset('/image/loader.gif') }}" alt="loading-img"></div>
-        <div id="content" class="content main"></div>
-        
+        <div class="content main">
+            <div id="container" class="container-widget"></div>
+        </div>
+        <div id="fixed"></div>
+        <div id="small-loader" class="row" style="display: none">
+            <div style="position:fixed;bottom: 20px;left:50px;z-index:2">
+                <div class="panel panel-widget">
+                  <div class="panel-body">
+                  <img src="{{ asset('/image/load.gif') }}" width="100" alt="loading-img">
+                  </div>
+                </div>
+            </div>
+        </div>
         <script data-main="{{ asset('/js/require_main') }}" src="{{ asset('/js/vendor/require.js') }}"></script>
     </body>
 </html>

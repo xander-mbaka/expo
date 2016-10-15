@@ -11,7 +11,11 @@ class Event extends Model
 {
     //
     protected $fillable = [
-        'name', 'description', 'begin_at', 'end_at'
+        'name', 'description', 'location_id', 'begin_at', 'end_at'
+    ];
+
+    protected $casts = [
+        'location_id' => 'int',
     ];
 
     public function location()

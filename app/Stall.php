@@ -2,20 +2,16 @@
 
 namespace App;
 
-use App\Hall;
+use App\Location;
+use App\Reservation;
 
 use Illuminate\Database\Eloquent\Model;
 
 class Stall extends Model
 {
-    //
-    protected $fillable = [
-        'name', 'price', 'image_url', 'path'
-    ];
-
-    public function hall()
+    public function location()
     {
-        return $this->belongsTo(Hall::class);
+        return $this->belongsTo(Location::class);
     }
 
     public function reservations()

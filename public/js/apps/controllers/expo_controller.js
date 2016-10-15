@@ -1,211 +1,108 @@
-define(["app", "apps/views/expo_view"], function(System, View){
+define(["app", "apps/views/expo_view", "tpl!apps/templates/booklayout.tpl"], 
+  function(System, View, layoutTpl){
   System.module('Expo.Show', function(Show, System, Backbone, Marionette, $, _){
+
+    //Layout window for the booking interface
+    var BookLayout = Backbone.Marionette.Layout.extend({
+      template: layoutTpl,
+
+      className: "row",
+
+      tagName: "div",
+
+      regions: {
+        hallRegion: ".hall-map",
+        standRegion: ".stand-details"
+      }
+
+    });
+
+    var layout = new BookLayout();
+
     Show.Controller = {
+
       showLocations: function(){ 
-        var view = new View.Locations();
-        
-        System.contentRegion.show(view);
 
         require(["apps/entities/expo"], function(){
           $.when(System.request("locations")).done(function(response){
             //alert(JSON.stringify(response));
+            var m = new Backbone.Model;
+            m.set('location', System.coreRoot);
 
-            var view = new View.Locations({ collection: response });
+            var view = new View.Locations({ collection: response, model: m });
             System.contentRegion.show(view);
 
-            view.on('viewEvents', function(data) {
-              $.when(System.request("events", data.location.id)).done(function(response){
-                if (result == 1) {
-                  view.triggerMethod("success");
-                }else{
-                  view.triggerMethod("error");
-                }
-              });
+            view.on('itemview:location:events', function(data, id) {
+              System.trigger("location:events:show", id);
             });
           });
         });
       },
 
+      showEvents: function(id){ 
+        var m = new Backbone.Model;
+        m.set('total', 0);
+        var view = new View.Events({model: m});
+        System.fixedRegion.show(view);
+        view.triggerMethod("fetch");
+        require(["apps/entities/expo"], function(){
+          $.when(System.request("location:events", id), System.request("location", id)).done(function(response, loctn){
+            //alert(JSON.stringify(response));
+            loctn.set('total', response.length);
 
+            var view = new View.Events({ collection: response, model: loctn });
+            System.fixedRegion.show(view);
 
-
-
-
-      showSuppliers: function(){ 
-        var view = new View.Suppliers();
-        System.contentRegion.show(view);
-
-        view.on('del', function(id) {
-          var data = {};
-          data['operation'] = 'deleteSupplier';
-          data['id'] = id;
-          $.post(System.coreRoot + '/service/procurement/index.php', data, function(result) {
-            if (result == 1) {
-              view.triggerMethod("delete");
-            }else{
-              view.triggerMethod("error");
-            }
-          });
-        });
-	    },      
-
-      receiveGoods: function(a){ 
-        var view = new View.GRN();
-        
-        System.contentRegion.show(view);
-
-        view.on('post', function(data) {
-          data['operation'] = 'postGenPurchase';
-          $.post(System.coreRoot + '/service/procurement/index.php', data, function(result) {
-            if (result != 0) {
-              var res = JSON.parse(result);
-              //alert(JSON.stringify(res));
-              if (res['transactionId']) {
-                view.triggerMethod("success", res);
-              }else{
-                view.triggerMethod("error");
-              }              
-            }else{
-              view.triggerMethod("error");
-            }
+            view.on('itemview:event:reservations', function(data, id) {
+              System.fixedRegion.close();
+              $('.loading').show();
+              System.trigger("event:reservations:show", id);
+            });
           });
         });
       },
 
-      receiveOrder: function(){ 
-        var view = new View.OrderGRN();
-        
-        System.contentRegion.show(view);
+      showReservations: function(id){ 
+        var self = this;
+        System.contentRegion.show(layout);
+        require(["apps/entities/expo"], function(){
+          $.when(System.request("event:reservations", id), System.request("event", id)).done(function(response, evnt){
+            //alert(JSON.stringify(response));
+            evnt.set('url', System.coreRoot)
+            //loctn.set('url', System.coreRoot);
 
-        view.on('post', function(data) {
-          data['operation'] = 'postOrderPurchase';
-          $.post(System.coreRoot + '/service/procurement/index.php', data, function(result) {
-            if (result != 0) {
-              var res = JSON.parse(result);
-              //alert(JSON.stringify(res));
-              if (res['transactionId']) {
-                view.triggerMethod("success", res);
-              }else{
-                view.triggerMethod("error");
-              }              
-            }else{
-              view.triggerMethod("error");
-            }
+            var view = new View.Hall({ collection: response, model: evnt });
+            layout.hallRegion.show(view);
+
+            var view = new View.Reservation({ model: evnt });
+            layout.standRegion.show(view);
+            
+
+            view.on('itemview:show:reservation', function(data, id) {
+              //System.trigger("show:reservation:show", id);
+              alert(id);
+              self.showReservation(id)
+            });
           });
         });
       },
 
-      paySupplierGRN: function(a){ 
-        var view = new View.PaySupplierWithGRN();
-        
-        System.contentRegion.show(view);
+      showReservation: function(id){ 
+        alert(id);
+        System.contentRegion.show(layout);
+        require(["apps/entities/expo"], function(){
+          $.when(SSystem.request("reservation", id)).done(function(reservation){
+            //alert(JSON.stringify(response));
+            reservation.set('url', System.coreRoot)
+            //loctn.set('url', System.coreRoot);
 
-        view.on('post', function(data) {
-          data['operation'] = 'makePaymentGRN';
-          $.post(System.coreRoot + '/service/procurement/index.php', data, function(result) {
-            if (result != 0) {
-              var res = JSON.parse(result);
-              //alert(JSON.stringify(res));
-              if (res['transactionId']) {
-                view.triggerMethod("success", res);
-              }else{
-                view.triggerMethod("error");
-              }              
-            }else{
-              view.triggerMethod("error");
-            }
-          });
-        });
-      },
+            var view = new View.Reservation({ model: reservation });
+            layout.standRegion.show(view);
+            
 
-      paySupplier: function(a){ 
-        var view = new View.PaySupplier();
-        
-        System.contentRegion.show(view);
-
-        view.on('post', function(data) {
-          data['operation'] = 'makePayment';
-          $.post(System.coreRoot + '/service/procurement/index.php', data, function(result) {
-            if (result != 0) {
-              var res = JSON.parse(result);
-              //alert(JSON.stringify(res));
-              if (res['transactionId']) {
-                view.triggerMethod("success", res);
-              }else{
-                view.triggerMethod("error");
-              }              
-            }else{
-              view.triggerMethod("error");
-            }
-          });
-        });
-      },
-
-      returnGoods: function(a){ 
-        var view = new View.GRO();
-        
-        System.contentRegion.show(view);
-
-        view.on('post', function(data) {
-          data['operation'] = 'postGenInvoice';
-          $.post(System.coreRoot + '/service/finance/index.php', data, function(result) {
-            if (result != 0) {
-              var res = JSON.parse(result);
-              //alert(JSON.stringify(res));
-              if (res['transactionId']) {
-                view.triggerMethod("success", res);
-              }else{
-                view.triggerMethod("error");
-              }              
-            }else{
-              view.triggerMethod("error");
-            }
-          });
-        });
-      },
-
-      purchaseOrder: function(a){ 
-        var view = new View.PurchaseOrder();
-        
-        System.contentRegion.show(view);
-
-        view.on('generate', function(data) {
-          data['operation'] = 'genPurchOrder';
-          $.post(System.coreRoot + '/service/procurement/index.php', data, function(result) {
-            if (result != 0) {
-              var res = JSON.parse(result);
-              //alert(JSON.stringify(res));
-              if (res['id']) {
-                view.triggerMethod("success", res);
-              }else{
-                view.triggerMethod("error");
-              }              
-            }else{
-              view.triggerMethod("error");
-            }
-          });
-        });
-      },
-
-      supplierTx: function(a){ 
-        var view = new View.SupplierTx();
-        
-        System.contentRegion.show(view);
-
-        view.on('search', function(data) {
-          data['operation'] = 'findSupplierEntries';
-          $.post(System.coreRoot + '/service/procurement/index.php', data, function(result) {
-            if (result != 0) {
-              var res = JSON.parse(result);
-              //alert(JSON.stringify(res));
-              if (res.length) {
-                view.triggerMethod("success", res);
-              }else{
-                view.triggerMethod("empty");
-              }                
-            }else{
-              view.triggerMethod("error");
-            }
+            view.on('itemview:show:reservation', function(data, id) {
+              System.trigger("show:reservation:show", id);
+            });
           });
         });
       }

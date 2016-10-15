@@ -3,7 +3,7 @@ define(["marionette", "sweetalert"], function(Marionette){
 
   window.momentum = System;
 
-  System.coreRoot = "http://localhost:8000/";
+  System.coreRoot = location.protocol+'//'+location.hostname+(location.port ? ':'+location.port: '')+'/';
   System.cache = {};
 
   var runApplication = function(options) {
@@ -12,8 +12,8 @@ define(["marionette", "sweetalert"], function(Marionette){
   };
 
   System.addRegions({
-    menuRegion: "#menu",
-    contentRegion: "#content"
+    fixedRegion: "#fixed",
+    contentRegion: "#container"
   });
 
   System.navigate = function(route,  options){
