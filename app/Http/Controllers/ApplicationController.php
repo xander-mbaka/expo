@@ -39,8 +39,19 @@ class ApplicationController extends Controller
         return view('layouts.index');
     }
 
+    public function reservation(Request $request, $rid)
+    {
+        $reservation = Reservation::where('id', $rid)->first();
 
-    public function reservations(Request $request, $eid)
+        $reservation->event;
+        $reservation->event->location;
+        $reservation->stall;
+
+        return response()->json($reservation);
+    }
+
+
+    public function event_reservations(Request $request, $eid)
     {
         $event = Event::find($eid);
         $reservations = $event->reservations;
@@ -109,33 +120,30 @@ class ApplicationController extends Controller
     public function store_reservation(Request $request)
     {
         $this->validate($request, [
-            'name' => 'required|max:255',
-            'event_id' => 'required|max:11',
-            'stall_id' => 'required|max:11',
+            'id' => 'required|max:10',
             'company' => 'required|max:255',
             'address' => 'required|max:255',
-            'contact_person' => 'required|max:255',
-            'contact_email' => 'required|email|max:255',
-            'logo_url' => 'required|max:255',
-            'marketing_url' => 'required|max:255',
+            'person' => 'required|max:255',
+            'email' => 'required|email|max:255',
+            //'phone' => 'required|max:255',
+            'logo' => 'required|max:255',
+            //'marketing_url' => 'required|max:255',
             'amount' => 'required|max:13',
         ]);
 
-        $reservation = new Reservation;
-        $reservation->name = $request->name;
-        $reservation->stall_id = $request->stall_id;
-        $reservation->event_id = $request->event_id;
+        $reservation = Reservation::where('id', $request->id)->first();
         $reservation->company = $request->company;
         $reservation->address = $request->address;
-        $reservation->contact_person = $request->contact_person;
-        $reservation->contact_email = $request->contact_email;
+        $reservation->contact_person = $request->person;
+        $reservation->contact_email = $request->email;
         $reservation->website = $request->website;
-        $reservation->logo_url = $request->logo_url;
-        $reservation->marketing_url = $request->marketing_url;
+        $reservation->logo_url = $request->logo;
+        //$reservation->marketing_url = $request->marketing_url;
         $reservation->amount = $request->amount;
+        $reservation->status = 1;
         $reservation->save();
 
-        return redirect('/reservation/'.$reservation->id);
+        return response()->json(array('response'=> 'success'), 200);//redirect('/reservation/'.$reservation->id);
     }
 
     /**
@@ -145,12 +153,40 @@ class ApplicationController extends Controller
      * @param  Task  $task
      * @return Response
      */
-    public function destroy_reservation(Request $request, Reservation $reservation)
+    public function destroy_reservation(Request $request, $rid)
     {
         //$this->authorize('destroy', $reservation);
 
         $reservation->delete();
 
         return redirect('/event/'.$reservation->event->id);
+    }
+
+    public function upload_logo(Request $request) {
+        if($request->hasFile('logo')) {
+          //upload an image to the /img/tmp directory and return the filepath.
+          $file = $request->file('logo');
+          $tmpFilePath = 'image/logos/';
+          $tmpFileName = $file->getClientOriginalName();
+          $file = $file->move(public_path() .'/'. $tmpFilePath, $tmpFileName);
+          $path = $tmpFilePath . $tmpFileName;
+          return response()->json(array('path'=> $path), 200);
+        } else {
+          return response()->json(false, 200);
+        }
+    }
+
+    public function upload_document(Request $request) {
+        if($request->hasFile('document')) {
+          //upload an image to the /img/tmp directory and return the filepath.
+          $file = $request->file('document');
+          $tmpFilePath = 'image/docs/';
+          $tmpFileName = $file->getClientOriginalName();//time() . '-' . 
+          $file = $file->move(public_path() . $tmpFilePath, $tmpFileName);
+          $path = $tmpFilePath . $tmpFileName;
+          return response()->json(array('path'=> $path), 200);
+        } else {
+          return response()->json(false, 200);
+        }
     }
 }

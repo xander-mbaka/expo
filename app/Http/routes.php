@@ -19,10 +19,12 @@ Route::group(['middleware' => ['web']], function () {
     Route::get('/location/{location}', 'ApplicationController@location');
     Route::get('/location/{location}/events', 'ApplicationController@events');
     Route::get('/event/{event}', 'ApplicationController@event');
-    Route::get('/event/{event}/reservations', 'ApplicationController@reservations');
+    Route::get('/event/{event}/reservations', 'ApplicationController@event_reservations');
+    Route::get('/reservation/{reservation}', 'ApplicationController@reservation');
     Route::post('/reservation', 'ApplicationController@store_reservation');
     Route::delete('/reservation/{reservation}', 'ApplicationController@destroy_reservation');
-
+    Route::post('upload/doc', 'ApplicationController@upload_document');
+    Route::post('upload/logo', 'ApplicationController@upload_logo');
     //Route::auth();
 
 });

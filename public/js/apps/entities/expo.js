@@ -57,6 +57,11 @@ define(["app"], function(System){
         return fetchModel('/event/'+id);
       },
 
+
+      getReservation: function(id){
+        return fetchModel('/reservation/'+id);
+      },
+
       getEventReservations: function(id){
         return fetchCollection('/event/'+id+'/reservations');
       },
@@ -117,6 +122,10 @@ define(["app"], function(System){
 
     System.reqres.setHandler("event", function(id){
       return API.getEvent(id);
+    });
+
+    System.reqres.setHandler("reservation", function(id){
+      return API.getReservation(id);
     });
   });
 

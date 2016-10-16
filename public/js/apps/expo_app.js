@@ -3,26 +3,26 @@ define(["app", "apps/controllers/expo_controller"], function(System, showControl
 
     ExpoApp.Router = Marionette.AppRouter.extend({
       appRoutes: {
-        "/" : "showLocations",
+        "home" : "showLocations",
         "events/:location" : "showEvents",
         "event/:event/reservations" : "showReservations",
-        "reservation/:reservation" : "showReservation",
+        "registration/:reservation" : "showRegistration",
         //"stall/:stall/:event" : "showStall"
       }
     });
 
     System.on("locations:show", function(){
-      System.navigate("/");
+      System.navigate("home");
       showController.showLocations();
     });
 
     System.on("location:events:show", function(lid){
-      //System.navigate("/events/"+lid);
+      System.navigate("events/"+lid);
       showController.showEvents(lid);
     });
 
     System.on("event:reservations:show", function(eid, location){
-      //System.navigate("/events/"+eid+'/reservations');
+      System.navigate("event/"+eid+'/reservations');
       showController.showReservations(eid, location);
     });
 

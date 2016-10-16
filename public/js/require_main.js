@@ -20,6 +20,7 @@ requirejs.config({
     //alerts
     sweetalert: "plugins/sweet-alert/sweet-alert.min",
     moment: "plugins/moment/moment.min",
+    jqueryui: "plugins/jquery-ui/jquery-ui.min",
     //calendar: "plugins/full-calendar/fullcalendar",
     daterange: "plugins/date-range-picker/daterangepicker",
 
@@ -60,7 +61,7 @@ requirejs.config({
     localstorage: ["backbone"],
     bootstrap: ["jquery"],
     plugins: ["bootstrap"],
-    basics: ["jquery", "bootstrap", "bootselect", "boottoggle", "sweetalert", "moment",  "daterange", "money"]
+    basics: ["jquery", "jqueryui", "bootstrap", "bootselect", "boottoggle", "sweetalert", "moment",  "daterange", "money"]
   }
 });
 
